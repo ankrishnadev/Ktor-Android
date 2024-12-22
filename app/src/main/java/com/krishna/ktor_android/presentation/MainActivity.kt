@@ -9,22 +9,37 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.ViewModelProvider
+import com.krishna.ktor_android.data.model.SearchResults
+import com.krishna.ktor_android.data.viewmodel.MainViewModel
 import com.krishna.ktor_android.ui.theme.KtorAndroidTheme
+import io.ktor.client.HttpClient
 
 class MainActivity : ComponentActivity() {
+
+    private lateinit var viewModel: MainViewModel
+
+    val client = HttpClient()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-
-
+        viewModel = ViewModelProvider.create(this)[MainViewModel::class]
+        viewModel.getSearchMoviesResult()
 
         setContent {
             KtorAndroidTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
+                        viewModel = viewModel,
                         name = "Android",
                         modifier = Modifier.padding(innerPadding)
                     )
@@ -35,17 +50,20 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
+fun Greeting(viewModel: MainViewModel, name: String, modifier: Modifier = Modifier) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var searchQueryResults by remember { mutableStateOf(SearchResults()) }
+
+    LaunchedEffect(Unit) {
+        viewModel.searchResults.observe(lifecycleOwner) { result ->
+            result?.let {
+                searchQueryResults = it
+            }
+        }
+    }
+
     Text(
-        text = "Hello $name!",
+        text = searchQueryResults.description.toString(),
         modifier = modifier
     )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    KtorAndroidTheme {
-        Greeting("Android")
-    }
 }
