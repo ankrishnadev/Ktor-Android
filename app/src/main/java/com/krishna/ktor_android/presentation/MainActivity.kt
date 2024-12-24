@@ -20,13 +20,10 @@ import androidx.lifecycle.ViewModelProvider
 import com.krishna.ktor_android.data.model.SearchResults
 import com.krishna.ktor_android.data.viewmodel.MainViewModel
 import com.krishna.ktor_android.ui.theme.KtorAndroidTheme
-import io.ktor.client.HttpClient
 
 class MainActivity : ComponentActivity() {
 
     private lateinit var viewModel: MainViewModel
-
-    val client = HttpClient()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,7 +37,6 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
                         viewModel = viewModel,
-                        name = "Android",
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -50,7 +46,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(viewModel: MainViewModel, name: String, modifier: Modifier = Modifier) {
+fun Greeting(viewModel: MainViewModel, modifier: Modifier = Modifier) {
     val lifecycleOwner = LocalLifecycleOwner.current
     var searchQueryResults by remember { mutableStateOf(SearchResults()) }
 
